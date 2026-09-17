@@ -11,6 +11,7 @@ class BantuanPage extends StatelessWidget {
         title: const Text('Bantuan'),
         backgroundColor: AppTheme.primaryDark,
         foregroundColor: Colors.white,
+        automaticallyImplyLeading: false,
       ),
       body: Center(
         child: ConstrainedBox(
