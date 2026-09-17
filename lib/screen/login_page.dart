@@ -4,6 +4,7 @@ import '../theme/app_theme.dart';
 import '../theme/gradient_background.dart';
 import '../services/auth_service.dart';
 import 'home_page.dart';
+import 'register_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -128,6 +129,22 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           )
                         : const Text('Login'),
+                  ),
+                  const SizedBox(
+                    height: AppTheme.spacingSmall,
+                  ), // >>> TAMBAHAN <
+                  TextButton(
+                    // >>> TAMBAHAN <
+                    onPressed: () => Navigator.push(
+                      // >>> TAMBAHAN <
+                      context, // >>> TAMBAHAN <
+                      MaterialPageRoute(
+                        builder: (_) => const RegisterPage(),
+                      ), // >>> TAMBAHAN <
+                    ), // >>> TAMBAHAN <
+                    child: const Text(
+                      'Belum punya akun? Daftar di sini',
+                    ), // >>> TAMBAHAN <
                   ),
                 ],
               ),
