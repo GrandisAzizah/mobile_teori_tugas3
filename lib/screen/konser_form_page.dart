@@ -4,6 +4,7 @@ import '../theme/app_theme.dart';
 import '../theme/gradient_background.dart';
 import '../services/konser_service.dart';
 import '../models/konser_model.dart';
+import '../models/agensi_model.dart';
 
 class KonserFormPage extends StatefulWidget {
   final KonserModel? konser;
@@ -21,7 +22,7 @@ class _KonserFormPageState extends State<KonserFormPage> {
   final _konserService = KonserService();
 
   late final TextEditingController _namaKonserController;
-  late final TextEditingController _namaIdolController;
+  late final TextEditingController _namaGrupController;
   late final TextEditingController _tanggalController;
   late final TextEditingController _venueController;
   late final TextEditingController _kapasitasController;
@@ -29,6 +30,9 @@ class _KonserFormPageState extends State<KonserFormPage> {
   late final TextEditingController _hargaController;
 
   String _status = 'akan_datang';
+  int? _agensiId;
+
+  late Future<List<AgensiModel>> _futureAgensi;
   bool _isSaving = false;
   String? _errorMessage;
 
@@ -40,7 +44,7 @@ class _KonserFormPageState extends State<KonserFormPage> {
     _namaKonserController = TextEditingController(
       text: konser?.namaKonser ?? '',
     );
-    _namaIdolController = TextEditingController(text: konser?.namaIdol ?? '');
+    _namaGrupController = TextEditingController(text: konser?.namaGrup ?? '');
     _tanggalController = TextEditingController(text: konser?.tanggal ?? '');
     _venueController = TextEditingController(text: konser?.venue ?? '');
     _kapasitasController = TextEditingController(
@@ -54,12 +58,15 @@ class _KonserFormPageState extends State<KonserFormPage> {
     );
 
     _status = konser?.status ?? 'akan_datang';
+    _agensiId = konser?.agensiId;
+
+    _futureAgensi = _konserService.getAllAgensi();
   }
 
   @override
   void dispose() {
     _namaKonserController.dispose();
-    _namaIdolController.dispose();
+    _namaGrupController.dispose();
     _tanggalController.dispose();
     _venueController.dispose();
     _kapasitasController.dispose();
@@ -89,6 +96,11 @@ class _KonserFormPageState extends State<KonserFormPage> {
   Future<void> _simpan() async {
     if (!_formKey.currentState!.validate()) return;
 
+    if (_agensiId == null) {
+      setState(() => _errorMessage = 'Pilih agensi terlebih dahulu');
+      return;
+    }
+
     setState(() {
       _isSaving = true;
       _errorMessage = null;
@@ -102,8 +114,9 @@ class _KonserFormPageState extends State<KonserFormPage> {
     if (widget.isEdit) {
       result = await _konserService.editKonser(
         id: widget.konser!.id,
+        agensiId: _agensiId!,
         namaKonser: _namaKonserController.text.trim(),
-        namaIdol: _namaIdolController.text.trim(),
+        namaGrup: _namaGrupController.text.trim(),
         tanggal: _tanggalController.text.trim(),
         venue: _venueController.text.trim(),
         kapasitas: kapasitas,
@@ -113,8 +126,9 @@ class _KonserFormPageState extends State<KonserFormPage> {
       );
     } else {
       result = await _konserService.tambahKonser(
+        agensiId: _agensiId!,
         namaKonser: _namaKonserController.text.trim(),
-        namaIdol: _namaIdolController.text.trim(),
+        namaGrup: _namaGrupController.text.trim(),
         tanggal: _tanggalController.text.trim(),
         venue: _venueController.text.trim(),
         kapasitas: kapasitas,
@@ -162,13 +176,35 @@ class _KonserFormPageState extends State<KonserFormPage> {
                 ),
                 const SizedBox(height: AppTheme.spacingMedium),
                 TextFormField(
-                  controller: _namaIdolController,
+                  controller: _namaGrupController,
                   decoration: const InputDecoration(
                     labelText: 'Nama Idol/Grup',
                   ),
                   validator: (value) => (value == null || value.trim().isEmpty)
                       ? 'Wajib diisi'
                       : null,
+                ),
+                const SizedBox(height: AppTheme.spacingMedium),
+                FutureBuilder<List<AgensiModel>>(
+                  future: _futureAgensi,
+                  builder: (context, snapshot) {
+                    final daftarAgensi = snapshot.data ?? [];
+                    return DropdownButtonFormField<int>(
+                      value: daftarAgensi.any((a) => a.id == _agensiId)
+                          ? _agensiId
+                          : null,
+                      decoration: const InputDecoration(labelText: 'Agensi'),
+                      items: daftarAgensi
+                          .map(
+                            (a) => DropdownMenuItem(
+                              value: a.id,
+                              child: Text(a.namaAgensi),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) => setState(() => _agensiId = value),
+                    );
+                  },
                 ),
                 const SizedBox(height: AppTheme.spacingMedium),
                 TextFormField(

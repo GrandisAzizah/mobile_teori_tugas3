@@ -102,7 +102,7 @@ class _AplikasiKonserPageState extends State<AplikasiKonserPage> {
                         .map(
                           (k) => DropdownMenuItem(
                             value: k.id,
-                            child: Text('${k.namaKonser} — ${k.namaIdol}'),
+                            child: Text('${k.namaKonser} — ${k.namaGrup}'),
                           ),
                         )
                         .toList(),

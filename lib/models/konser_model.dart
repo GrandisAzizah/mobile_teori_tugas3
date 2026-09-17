@@ -1,7 +1,9 @@
 class KonserModel {
   final int id;
+  final int? agensiId;
+  final String? namaAgensi; // hasil JOIN dari get_konser.php
   final String namaKonser;
-  final String namaIdol;
+  final String namaGrup;
   final String? tanggal; // format: yyyy-MM-dd
   final String venue;
   final int kapasitas;
@@ -11,8 +13,10 @@ class KonserModel {
 
   KonserModel({
     required this.id,
+    this.agensiId,
+    this.namaAgensi,
     required this.namaKonser,
-    required this.namaIdol,
+    required this.namaGrup,
     this.tanggal,
     required this.venue,
     required this.kapasitas,
@@ -40,8 +44,12 @@ class KonserModel {
   factory KonserModel.fromJson(Map<String, dynamic> json) {
     return KonserModel(
       id: int.parse(json['id'].toString()),
+      agensiId: json['agensi_id'] != null
+          ? int.tryParse(json['agensi_id'].toString())
+          : null,
+      namaAgensi: json['nama_agensi'],
       namaKonser: json['nama_konser'] ?? '',
-      namaIdol: json['nama_idol'] ?? '',
+      namaGrup: json['nama_grup'] ?? '',
       tanggal: json['tanggal'],
       venue: json['venue'] ?? '',
       kapasitas: int.tryParse(json['kapasitas'].toString()) ?? 0,
