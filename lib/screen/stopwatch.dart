@@ -14,36 +14,30 @@ class _StopwatchState extends State<Stopwatch> {
   int _elapsedSeconds = 0;
   bool _isRunning = false;
   Timer? _timer;
-  List<int> _laps = [];
+  final List<int> _laps = [];
 
-  // ===== START =====
+  // ===== START / RESUME =====
   void _startTimer() {
     if (_isRunning) return;
 
-    setState(() {
-      _isRunning = true;
-    });
+    setState(() => _isRunning = true);
 
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      setState(() {
-        _elapsedSeconds++;
-      });
+      setState(() => _elapsedSeconds++);
     });
   }
 
-  // ===== STOP =====
-  void _stopTimer() {
+  // ===== PAUSE (berhenti sementara, waktu tetap) =====
+  void _pauseTimer() {
     if (!_isRunning) return;
 
-    setState(() {
-      _isRunning = false;
-    });
+    setState(() => _isRunning = false);
     _timer?.cancel();
   }
 
-  // ===== RESET =====
+  // ===== RESET (balik ke 0) =====
   void _resetTimer() {
-    _stopTimer();
+    _pauseTimer();
     setState(() {
       _elapsedSeconds = 0;
       _laps.clear();
@@ -53,25 +47,22 @@ class _StopwatchState extends State<Stopwatch> {
   // ===== LAP =====
   void _addLap() {
     if (_elapsedSeconds == 0) return;
-    setState(() {
-      _laps.add(_elapsedSeconds);
-    });
+    setState(() => _laps.insert(0, _elapsedSeconds));
   }
 
-  // ===== FORMAT HH:MM:SS =====
+  // ===== FORMAT =====
   String get _formattedTime {
-    final hours = (_elapsedSeconds ~/ 3600).toString().padLeft(2, '0');
-    final minutes = ((_elapsedSeconds % 3600) ~/ 60).toString().padLeft(2, '0');
-    final seconds = (_elapsedSeconds % 60).toString().padLeft(2, '0');
-    return '$hours:$minutes:$seconds';
+    final h = (_elapsedSeconds ~/ 3600).toString().padLeft(2, '0');
+    final m = ((_elapsedSeconds % 3600) ~/ 60).toString().padLeft(2, '0');
+    final s = (_elapsedSeconds % 60).toString().padLeft(2, '0');
+    return '$h:$m:$s';
   }
 
-  // ===== FORMAT LAP (HH:MM:SS) =====
-  String _formatLap(int totalSeconds) {
-    final hours = (totalSeconds ~/ 3600).toString().padLeft(2, '0');
-    final minutes = ((totalSeconds % 3600) ~/ 60).toString().padLeft(2, '0');
-    final seconds = (totalSeconds % 60).toString().padLeft(2, '0');
-    return '$hours:$minutes:$seconds';
+  String _formatLap(int total) {
+    final h = (total ~/ 3600).toString().padLeft(2, '0');
+    final m = ((total % 3600) ~/ 60).toString().padLeft(2, '0');
+    final s = (total % 60).toString().padLeft(2, '0');
+    return '$h:$m:$s';
   }
 
   @override
@@ -87,6 +78,7 @@ class _StopwatchState extends State<Stopwatch> {
         title: const Text('Stopwatch'),
         backgroundColor: AppTheme.primaryDark,
         foregroundColor: Colors.white,
+        automaticallyImplyLeading: false,
       ),
       body: Container(
         color: AppTheme.background,
@@ -96,31 +88,61 @@ class _StopwatchState extends State<Stopwatch> {
             Expanded(
               flex: 2,
               child: Center(
-                child: Text(
-                  _formattedTime,
-                  style: const TextStyle(
-                    fontSize: 56,
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.black,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Text(
+                      _formattedTime,
+                      style: const TextStyle(
+                        fontSize: 56,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.black,
+                      ),
+                    ),
                   ),
                 ),
               ),
             ),
 
             // ===== TOMBOL =====
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _buildControlButton(
-                  _isRunning ? 'Pause' : 'Start',
-                  _isRunning ? Colors.orange : Colors.green,
-                  _isRunning ? _stopTimer : _startTimer,
+            Center(
+              // 👈 Tengahin
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  maxWidth: 500,
+                ), // 👈 MAX WIDTH
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _buildControlButton(
+                          _isRunning ? 'Pause' : 'Start',
+                          _isRunning ? Colors.orange : Colors.green,
+                          _isRunning ? _pauseTimer : _startTimer,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _buildControlButton(
+                          'Lap',
+                          AppTheme.primaryLight,
+                          _addLap,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _buildControlButton(
+                          'Reset',
+                          AppTheme.error,
+                          _resetTimer,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(width: 12),
-                _buildControlButton('Lap', AppTheme.primaryLight, _addLap),
-                const SizedBox(width: 12),
-                _buildControlButton('Reset', AppTheme.error, _resetTimer),
-              ],
+              ),
             ),
             const SizedBox(height: 20),
 
@@ -137,9 +159,8 @@ class _StopwatchState extends State<Stopwatch> {
                   : ListView.builder(
                       itemCount: _laps.length,
                       itemBuilder: (context, index) {
-                        final lapNum = index + 1;
+                        final lapNum = _laps.length - index;
                         final sec = _laps[index];
-
                         return ListTile(
                           leading: CircleAvatar(
                             backgroundColor: AppTheme.primaryDark,
@@ -166,7 +187,6 @@ class _StopwatchState extends State<Stopwatch> {
     );
   }
 
-  // ===== BUILDER TOMBOL =====
   Widget _buildControlButton(
     String label,
     Color color,
@@ -177,8 +197,9 @@ class _StopwatchState extends State<Stopwatch> {
       style: ElevatedButton.styleFrom(
         backgroundColor: color,
         foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
+        minimumSize: const Size(0, 45),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       ),
       child: Text(
         label,
