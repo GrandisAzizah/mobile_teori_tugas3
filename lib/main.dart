@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_teori_tugas3/screen/home_page.dart';
 
 import './theme/app_theme.dart';
 import './screen/login_page.dart';
@@ -20,12 +21,13 @@ class MyApp extends StatelessWidget {
       theme: AppTheme.light(),
       debugShowCheckedModeBanner: false,
       // ini dibuat kayak gini supaya bottom nav bisa dipanggil
-      initialRoute: '/main',
+      initialRoute: '/login_page',
       routes: {
         '/login_page': (context) => const LoginPage(),
         '/main': (context) => const BottomNavigationPage(),
         '/stopwatch': (context) => const Stopwatch(),
         '/bantuan': (context) => const BantuanPage(),
+        '/home_page': (context) => const HomePage(),
       },
     );
   }

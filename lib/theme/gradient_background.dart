@@ -8,6 +8,7 @@ class GradientScaffold extends StatelessWidget {
   final List<Widget>? actions;
   final bool showAppBar;
   final Widget? floatingActionButton;
+  final bool showBackButton;
 
   const GradientScaffold({
     super.key,
@@ -16,6 +17,7 @@ class GradientScaffold extends StatelessWidget {
     this.actions,
     this.showAppBar = true,
     this.floatingActionButton,
+    this.showBackButton = true,
   });
 
   @override
@@ -28,6 +30,7 @@ class GradientScaffold extends StatelessWidget {
               backgroundColor: Colors.transparent,
               elevation: 0,
               actions: actions,
+              automaticallyImplyLeading: showBackButton,
             )
           : null,
       body: Container(

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_teori_tugas3/screen/calendar_weton_sakabali.dart';
+import 'package:mobile_teori_tugas3/screen/date_hijriah_umur.dart';
 
 import '../theme/app_theme.dart';
 import '../theme/gradient_background.dart';
@@ -15,6 +17,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return GradientScaffold(
       title: 'EclipseOps',
+      showBackButton: false,
       actions: [
         IconButton(
           icon: const Icon(Icons.logout),
@@ -76,17 +79,26 @@ class HomePage extends StatelessWidget {
               const SizedBox(height: AppTheme.spacingMedium),
               _MenuTile(
                 icon: Icons.calendar_month_outlined,
-                label: 'Konversi Tanggal',
-                subtitle: 'Menunggu punya Orang C',
-                onTap: () => _showPlaceholder(context, 'Konversi Tanggal'),
+                label: 'Konversi Tanggal Hijriah & Umur',
+                subtitle: 'Konversi input tanggal ke Hijriah & konversi umur',
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const DateConversionScreen(),
+                  ),
+                ),
               ),
               const SizedBox(height: AppTheme.spacingMedium),
               _MenuTile(
                 icon: Icons.brightness_5_outlined,
-                label: 'Kalender Weton & Saka Bali',
-                subtitle: 'Menunggu punya Orang C/D',
-                onTap: () =>
-                    _showPlaceholder(context, 'Kalender Weton & Saka Bali'),
+                label: 'Konversi Kalender Weton & Saka Bali',
+                subtitle: 'Menentukan weton Jawa dan saka Bali',
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const CalendarConversionScreen(),
+                  ),
+                ),
               ),
             ],
           ),

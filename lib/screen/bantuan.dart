@@ -30,37 +30,31 @@ class BantuanPage extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Panduan lengkap fitur-fitur aplikasi',
+                'Panduan penggunaan fitur-fitur aplikasi',
                 style: TextStyle(fontSize: 14, color: Colors.grey[600]),
               ),
               const SizedBox(height: 24),
 
               // ===== DAFTAR CARA PAKAI =====
               _buildHelpItem(
-                icon: Icons.login,
-                title: '1. Login',
-                description: 'Masukkan username dan password. Jika salah, akan muncul peringatan.',
-              ),
-              _buildHelpItem(
                 icon: Icons.edit,
-                title: '2. (Tunggu menu selesai)',
-                description: '(Tunggu menu selesai).',
+                title: '1. CRUD Konser',
+                description: 'Menu untuk mengelola data konser meliputi tambah data, edit data, dan hapus data.',
               ),
               _buildHelpItem(
                 icon: Icons.mosque,
-                title: '3. Menu Konversi Tanggal Hijriah',
-                description:
-                    'Konversi tanggal Masehi ke Hijriah dan sebaliknya.',
+                title: '2. Menu Konversi Tanggal Hijriah & Umur',
+                description: 'Konversi tanggal Masehi ke Hijriah dan perhitungan umur. Input tanggal yang diinginkan lalu klik tombol Konversi ke Hijriah untuk mengetahui kalender Hijriahnya atau klik Hitung Detail Umur untuk mengetahui perhitungan umur dari tanggal yang diinput hingga waktu menginput.',
               ),
               _buildHelpItem(
                 icon: Icons.calendar_month,
-                title: '4. Menu Konversi Kalender',
-                description: 'Hitung umur dari tanggal lahir (tahun, bulan, hari, jam, menit, detik). Juga konversi ke Kalender Jawa dan Saka.',
+                title: '3. Menu Konversi Kalender Weton & Saka',
+                description: 'Pilih tanggal tertentu dari kalender lalu klik Konversi ke Weton Jawa untuk melihat weton Jawa dari tanggal tersebut atau klik Konversi ke Saka Bali untuk melihat Saka Bali dari tanggal tersebut.',
               ),
               _buildHelpItem(
                 icon: Icons.lock_clock_rounded,
-                title: '5. Stopwatch',
-                description: 'Tekan "Start" untuk memulai. Tekan "Lap" untuk mencatat waktu. Tekan "Pause" untuk berhenti. Tekan "Reset" untuk mengulang.',
+                title: '4. Stopwatch',
+                description: 'Tekan "Start" untuk memulai lalu tombol "Start" akan berubah menjadi tombol "Pause" yang jika ditekan akan menghentikan perhitungan waktu stopwatch disertai dengan tombol kembali berubah menjadi "Start" untuk melanjutkan hitung waktu pada stopwatch. Tekan "Lap" untuk mencatat waktu. Tekan "Reset" untuk mengulang. Data Lap akan hilang ketika tombol "Reset" ditekan',
               ),
 
               const SizedBox(height: 24),
