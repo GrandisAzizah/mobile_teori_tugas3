@@ -106,15 +106,6 @@ class HomePage extends StatelessWidget {
       ),
     );
   }
-
-  void _showPlaceholder(BuildContext context, String namaMenu) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$namaMenu belum tersedia'),
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
 }
 
 // Satu tile menu di Halaman Utama

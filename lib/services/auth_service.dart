@@ -1,58 +1,85 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'api_config.dart';
 import '../models/user_model.dart';
 
 class AuthService {
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
+
   // ---------------------------------------------------------
   // LOGIN
-  // Return: {"success": true/false, "message": "...", "user": UserModel?}
+  // Cari user di collection 'users' yang email & password cocok
   // ---------------------------------------------------------
   Future<Map<String, dynamic>> login(String email, String password) async {
     try {
-      final response = await http.post(
-        Uri.parse("${ApiConfig.baseUrl}/login.php"),
-        body: {"email": email, "password": password},
+      final result = await _db
+          .collection('users')
+          .where('email', isEqualTo: email)
+          .where('password', isEqualTo: password)
+          .limit(1)
+          .get();
+
+      if (result.docs.isEmpty) {
+        return {"success": false, "message": "Email atau password salah"};
+      }
+
+      final doc = result.docs.first;
+      final data = doc.data();
+
+      final user = UserModel(
+        id: 0, // Firestore pakai string ID, tapi UserModel pakai int.
+        // Untuk sekarang pakai 0, atau ubah model kalau perlu.
+        nama: data['nama'] ?? '',
+        email: data['email'] ?? '',
       );
 
-      final data = jsonDecode(response.body);
-
-      if (data['success'] == true) {
-        final user = UserModel.fromJson(data['user']);
-        await _saveSession(user);
-        return {"success": true, "message": data['message'], "user": user};
-      } else {
-        return {"success": false, "message": data['message']};
-      }
+      await _saveSession(user);
+      return {"success": true, "message": "Login berhasil", "user": user};
     } catch (e) {
-      return {"success": false, "message": "Gagal terhubung ke server: $e"};
+      return {"success": false, "message": "Gagal login: $e"};
     }
   }
 
   // ---------------------------------------------------------
   // REGISTER
+  // Simpan user baru ke collection 'users'
   // ---------------------------------------------------------
   Future<Map<String, dynamic>> register(
-      String nama, String email, String password) async {
+    String nama,
+    String email,
+    String password,
+  ) async {
     try {
-      final response = await http.post(
-        Uri.parse("${ApiConfig.baseUrl}/register.php"),
-        body: {"nama": nama, "email": email, "password": password},
-      );
-      return jsonDecode(response.body);
+      // Cek apakah email sudah terdaftar
+      final cek = await _db
+          .collection('users')
+          .where('email', isEqualTo: email)
+          .limit(1)
+          .get();
+
+      if (cek.docs.isNotEmpty) {
+        return {"success": false, "message": "Email sudah terdaftar"};
+      }
+
+      // Simpan user baru
+      await _db.collection('users').add({
+        'nama': nama,
+        'email': email,
+        'password': password, // Catatan: nanti sebaiknya di-hash
+        'created_at': FieldValue.serverTimestamp(),
+      });
+
+      return {"success": true, "message": "Registrasi berhasil, silakan login"};
     } catch (e) {
-      return {"success": false, "message": "Gagal terhubung ke server: $e"};
+      return {"success": false, "message": "Gagal register: $e"};
     }
   }
 
   // ---------------------------------------------------------
-  // SESSION MANAGEMENT (dipakai juga oleh D untuk tombol Logout)
+  // SESSION MANAGEMENT (SharedPreferences)
   // ---------------------------------------------------------
   Future<void> _saveSession(UserModel user) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isLoggedIn', true);
-    await prefs.setInt('userId', user.id);
     await prefs.setString('userNama', user.nama);
     await prefs.setString('userEmail', user.email);
   }
@@ -68,13 +95,12 @@ class AuthService {
     if (!loggedIn) return null;
 
     return UserModel(
-      id: prefs.getInt('userId') ?? 0,
+      id: 0,
       nama: prefs.getString('userNama') ?? '',
       email: prefs.getString('userEmail') ?? '',
     );
   }
 
-  // Dipanggil dari tombol Logout (halaman Bantuan milik D)
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();

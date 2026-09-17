@@ -20,7 +20,7 @@ dependencies:
   http: ^1.2.2
 
   # Untuk session management (menyimpan status login)
-  shared_preferences: ^2.3.3
+  shared_preferences: ^2.5.5
 
   # Untuk konversi kalender hijriah 
   hijri_date_time: ^1.1.0 
