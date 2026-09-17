@@ -27,16 +27,16 @@ class _BottomNavigationPageState extends State<BottomNavigationPage> {
       // 👇 BOTTOM NAV BIASA, ROUNDED ATAS
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: AppTheme.background, // 👈 Warna nav
+          color: AppTheme.background,
           borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(24), // 👈 Rounded kiri atas
-            topRight: Radius.circular(24), // 👈 Rounded kanan atas
+            topLeft: Radius.circular(24),
+            topRight: Radius.circular(24),
           ),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.1),
               blurRadius: 10,
-              offset: const Offset(0, -2), // 👈 Shadow ke atas
+              offset: const Offset(0, -2),
             ),
           ],
         ),
@@ -52,9 +52,8 @@ class _BottomNavigationPageState extends State<BottomNavigationPage> {
             unselectedItemColor: AppTheme.accentGrey,
             selectedFontSize: 12,
             showSelectedLabels: true,
-            showUnselectedLabels: false,
-            type:
-                BottomNavigationBarType.fixed, // 👈 Biar label selalu keliatan
+            showUnselectedLabels: true,
+            type: BottomNavigationBarType.fixed,
             onTap: (index) {
               setState(() {
                 myCurrentIndex = index;
