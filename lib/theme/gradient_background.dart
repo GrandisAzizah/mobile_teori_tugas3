@@ -1,20 +1,6 @@
 import 'package:flutter/material.dart';
-import 'app_theme.dart';
 
-// =========================================================
-// GradientScaffold
-// Scaffold siap pakai dengan AppBar transparan + background
-// gradient biru sesuai standar UI EclipseOps. Dipakai untuk
-// halaman Login, Home, dan halaman lain yang perlu tampilan
-// gradient di bagian atas.
-//
-// Contoh pemakaian:
-//
-// GradientScaffold(
-//   title: 'Login',
-//   body: Center(child: Text('Isi halaman di sini')),
-// )
-// =========================================================
+import 'app_theme.dart';
 
 class GradientScaffold extends StatelessWidget {
   final String? title;

@@ -1,17 +1,7 @@
 import 'package:flutter/material.dart';
+
 import 'app_theme.dart';
 import 'gradient_background.dart';
-
-// =========================================================
-// StyleGuidePage
-// Halaman referensi visual — BUKAN halaman final aplikasi.
-// Tujuannya cuma biar semua anggota (B, C, D) bisa lihat
-// langsung contoh warna, tombol, card, dan font yang dipakai
-// di EclipseOps, sebelum bikin halaman masing-masing.
-//
-// Cara lihat: jalankan `flutter run` lalu ganti sementara
-// `home:` di main.dart jadi `const StyleGuidePage()`.
-// =========================================================
 
 class StyleGuidePage extends StatelessWidget {
   const StyleGuidePage({super.key});
@@ -27,12 +17,16 @@ class StyleGuidePage extends StatelessWidget {
           children: [
             Text(
               'Judul Halaman (Poppins Bold)',
-              style: AppTheme.textTheme.headlineMedium?.copyWith(color: AppTheme.white),
+              style: AppTheme.textTheme.headlineMedium?.copyWith(
+                color: AppTheme.white,
+              ),
             ),
             const SizedBox(height: AppTheme.spacingSmall),
             Text(
               'Ini contoh teks isi/body pakai font Inter. Dipakai untuk paragraf, deskripsi, dan teks di dalam card.',
-              style: AppTheme.textTheme.bodyMedium?.copyWith(color: AppTheme.white),
+              style: AppTheme.textTheme.bodyMedium?.copyWith(
+                color: AppTheme.white,
+              ),
             ),
             const SizedBox(height: AppTheme.spacingLarge),
 
@@ -84,7 +78,9 @@ class StyleGuidePage extends StatelessWidget {
               '#0F2C59 → #3A6EA5) dipakai di AppBar dan latar utama '
               '(lihat GradientScaffold). Card dan konten pakai warna '
               'solid terang (#F5F7FA / putih) supaya teks tetap kebaca.',
-              style: AppTheme.textTheme.bodySmall?.copyWith(color: AppTheme.white),
+              style: AppTheme.textTheme.bodySmall?.copyWith(
+                color: AppTheme.white,
+              ),
             ),
           ],
         ),
