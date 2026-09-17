@@ -21,7 +21,7 @@ class _KonserFormPageState extends State<KonserFormPage> {
   final _konserService = KonserService();
 
   late final TextEditingController _namaKonserController;
-  late final TextEditingController _namaGrupController;
+  late final TextEditingController _namaIdolController;
   late final TextEditingController _tanggalController;
   late final TextEditingController _venueController;
   late final TextEditingController _kapasitasController;
@@ -40,7 +40,7 @@ class _KonserFormPageState extends State<KonserFormPage> {
     _namaKonserController = TextEditingController(
       text: konser?.namaKonser ?? '',
     );
-    _namaGrupController = TextEditingController(text: konser?.namaGrup ?? '');
+    _namaIdolController = TextEditingController(text: konser?.namaIdol ?? '');
     _tanggalController = TextEditingController(text: konser?.tanggal ?? '');
     _venueController = TextEditingController(text: konser?.venue ?? '');
     _kapasitasController = TextEditingController(
@@ -59,7 +59,7 @@ class _KonserFormPageState extends State<KonserFormPage> {
   @override
   void dispose() {
     _namaKonserController.dispose();
-    _namaGrupController.dispose();
+    _namaIdolController.dispose();
     _tanggalController.dispose();
     _venueController.dispose();
     _kapasitasController.dispose();
@@ -103,7 +103,7 @@ class _KonserFormPageState extends State<KonserFormPage> {
       result = await _konserService.editKonser(
         id: widget.konser!.id,
         namaKonser: _namaKonserController.text.trim(),
-        namaGrup: _namaGrupController.text.trim(),
+        namaIdol: _namaIdolController.text.trim(),
         tanggal: _tanggalController.text.trim(),
         venue: _venueController.text.trim(),
         kapasitas: kapasitas,
@@ -114,7 +114,7 @@ class _KonserFormPageState extends State<KonserFormPage> {
     } else {
       result = await _konserService.tambahKonser(
         namaKonser: _namaKonserController.text.trim(),
-        namaGrup: _namaGrupController.text.trim(),
+        namaIdol: _namaIdolController.text.trim(),
         tanggal: _tanggalController.text.trim(),
         venue: _venueController.text.trim(),
         kapasitas: kapasitas,
@@ -162,7 +162,7 @@ class _KonserFormPageState extends State<KonserFormPage> {
                 ),
                 const SizedBox(height: AppTheme.spacingMedium),
                 TextFormField(
-                  controller: _namaGrupController,
+                  controller: _namaIdolController,
                   decoration: const InputDecoration(
                     labelText: 'Nama Idol/Grup',
                   ),

@@ -22,7 +22,7 @@ class KonserService {
 
   Future<Map<String, dynamic>> tambahKonser({
     required String namaKonser,
-    required String namaGrup,
+    required String namaIdol,
     required String tanggal, // format: yyyy-MM-dd
     required String venue,
     required int kapasitas,
@@ -34,7 +34,7 @@ class KonserService {
       Uri.parse("${ApiConfig.baseUrl}/tambah_konser.php"),
       body: {
         "nama_konser": namaKonser,
-        "nama_grup": namaGrup,
+        "nama_idol": namaIdol,
         "tanggal": tanggal,
         "venue": venue,
         "kapasitas": kapasitas.toString(),
@@ -49,7 +49,7 @@ class KonserService {
   Future<Map<String, dynamic>> editKonser({
     required int id,
     required String namaKonser,
-    required String namaGrup,
+    required String namaIdol,
     required String tanggal,
     required String venue,
     required int kapasitas,
@@ -62,7 +62,7 @@ class KonserService {
       body: {
         "id": id.toString(),
         "nama_konser": namaKonser,
-        "nama_grup": namaGrup,
+        "nama_idol": namaIdol,
         "tanggal": tanggal,
         "venue": venue,
         "kapasitas": kapasitas.toString(),

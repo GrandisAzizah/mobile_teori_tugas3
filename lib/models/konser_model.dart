@@ -1,7 +1,7 @@
 class KonserModel {
   final int id;
   final String namaKonser;
-  final String namaGrup;
+  final String namaIdol;
   final String? tanggal; // format: yyyy-MM-dd
   final String venue;
   final int kapasitas;
@@ -12,7 +12,7 @@ class KonserModel {
   KonserModel({
     required this.id,
     required this.namaKonser,
-    required this.namaGrup,
+    required this.namaIdol,
     this.tanggal,
     required this.venue,
     required this.kapasitas,
@@ -41,7 +41,7 @@ class KonserModel {
     return KonserModel(
       id: int.parse(json['id'].toString()),
       namaKonser: json['nama_konser'] ?? '',
-      namaGrup: json['nama_grup'] ?? '',
+      namaIdol: json['nama_idol'] ?? '',
       tanggal: json['tanggal'],
       venue: json['venue'] ?? '',
       kapasitas: int.tryParse(json['kapasitas'].toString()) ?? 0,

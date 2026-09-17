@@ -5,6 +5,14 @@ import '../theme/gradient_background.dart';
 import '../services/anggota_service.dart';
 import '../models/anggota_model.dart';
 
+// Data fallback dipakai kalau fetch ke get_anggota.php gagal/belum aktif, supaya halaman tetap bisa dites duluan. Otomatis kepakai data asli begitu API-nya jalan.
+final List<AnggotaModel> _anggotaFallback = [
+  AnggotaModel(id: 1, nama: 'Grandis Nur Azizah', nim: '124240045'),
+  AnggotaModel(id: 2, nama: 'Chairun Feyza Hersaputri', nim: '124240105'),
+  AnggotaModel(id: 3, nama: 'Anindya Zahir Adianputri', nim: '124240113'),
+  AnggotaModel(id: 4, nama: 'Rara Ayu Pratiwi', nim: '124240151'),
+];
+
 class DaftarAnggotaPage extends StatefulWidget {
   const DaftarAnggotaPage({super.key});
 
@@ -19,13 +27,23 @@ class _DaftarAnggotaPageState extends State<DaftarAnggotaPage> {
   @override
   void initState() {
     super.initState();
-    _futureAnggota = _anggotaService.getAllAnggota();
+    _futureAnggota = _muatAnggota();
   }
 
   void _reload() {
     setState(() {
-      _futureAnggota = _anggotaService.getAllAnggota();
+      _futureAnggota = _muatAnggota();
     });
+  }
+
+  // Coba ambil dari API dulu; kalau gagal/kosong, pakai data fallback
+  Future<List<AnggotaModel>> _muatAnggota() async {
+    try {
+      final hasil = await _anggotaService.getAllAnggota();
+      return hasil.isNotEmpty ? hasil : _anggotaFallback;
+    } catch (_) {
+      return _anggotaFallback;
+    }
   }
 
   @override
@@ -40,12 +58,6 @@ class _DaftarAnggotaPageState extends State<DaftarAnggotaPage> {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(
                 child: CircularProgressIndicator(color: AppTheme.white),
-              );
-            }
-
-            if (snapshot.hasError) {
-              return _buildMessage(
-                'Gagal memuat data staff.\n${snapshot.error}',
               );
             }
 

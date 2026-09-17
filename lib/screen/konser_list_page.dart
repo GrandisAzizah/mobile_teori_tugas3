@@ -188,7 +188,7 @@ class _KonserListPageState extends State<KonserListPage> {
               ],
             ),
             const SizedBox(height: 4),
-            Text(konser.namaGrup, style: AppTheme.textTheme.bodyMedium),
+            Text(konser.namaIdol, style: AppTheme.textTheme.bodyMedium),
             const SizedBox(height: 2),
             Text(
               '${konser.venue} • ${konser.tanggal ?? "-"}',
