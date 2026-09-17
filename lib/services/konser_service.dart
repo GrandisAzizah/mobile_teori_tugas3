@@ -1,22 +1,35 @@
 import 'dart:convert';
+
 import 'package:http/http.dart' as http;
+
 import 'api_config.dart';
 import '../models/konser_model.dart';
 import '../models/agensi_model.dart';
 
-// =========================================================
-// konser_service.dart
-// Untuk Orang B — dipakai di halaman CRUD & Kalkulasi Konser.
-// =========================================================
-
 class KonserService {
   Future<List<KonserModel>> getAllKonser() async {
-    final response = await http.get(Uri.parse("${ApiConfig.baseUrl}/get_konser.php"));
+    final response = await http.get(
+      Uri.parse("${ApiConfig.baseUrl}/get_konser.php"),
+    );
     final data = jsonDecode(response.body);
 
     if (data['success'] == true) {
       return (data['data'] as List)
           .map((item) => KonserModel.fromJson(item))
+          .toList();
+    }
+    return [];
+  }
+
+  Future<List<AgensiModel>> getAllAgensi() async {
+    final response = await http.get(
+      Uri.parse("${ApiConfig.baseUrl}/get_agensi.php"),
+    );
+    final data = jsonDecode(response.body);
+
+    if (data['success'] == true) {
+      return (data['data'] as List)
+          .map((item) => AgensiModel.fromJson(item))
           .toList();
     }
     return [];
@@ -86,17 +99,5 @@ class KonserService {
       body: {"id": id.toString()},
     );
     return jsonDecode(response.body);
-  }
-
-  Future<List<AgensiModel>> getAllAgensi() async {
-    final response = await http.get(Uri.parse("${ApiConfig.baseUrl}/get_agensi.php"));
-    final data = jsonDecode(response.body);
-
-    if (data['success'] == true) {
-      return (data['data'] as List)
-          .map((item) => AgensiModel.fromJson(item))
-          .toList();
-    }
-    return [];
   }
 }
