@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+
 import '../theme/app_theme.dart';
 import '../theme/gradient_background.dart';
 import '../services/auth_service.dart';
-import 'home_page_placeholder.dart';
+import 'home_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -40,11 +41,9 @@ class _LoginPageState extends State<LoginPage> {
     if (!mounted) return;
 
     if (result['success'] == true) {
-      // Setelah Home asli (Orang B) jadi, ganti HomePagePlaceholder()
-      // di bawah ini dengan Home asli.
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const HomePagePlaceholder()),
+        MaterialPageRoute(builder: (_) => const HomePage()),
       );
     } else {
       setState(() => _errorMessage = result['message']);

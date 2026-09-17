@@ -7,6 +7,7 @@ class GradientScaffold extends StatelessWidget {
   final Widget body;
   final List<Widget>? actions;
   final bool showAppBar;
+  final Widget? floatingActionButton;
 
   const GradientScaffold({
     super.key,
@@ -14,6 +15,7 @@ class GradientScaffold extends StatelessWidget {
     required this.body,
     this.actions,
     this.showAppBar = true,
+    this.floatingActionButton,
   });
 
   @override
@@ -34,6 +36,7 @@ class GradientScaffold extends StatelessWidget {
         decoration: const BoxDecoration(gradient: AppTheme.primaryGradient),
         child: SafeArea(child: body),
       ),
+      floatingActionButton: floatingActionButton,
     );
   }
 }

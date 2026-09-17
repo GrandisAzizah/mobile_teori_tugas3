@@ -1,6 +1,5 @@
 class KonserModel {
   final int id;
-  final int? agensiId;
   final String namaKonser;
   final String namaGrup;
   final String? tanggal; // format: yyyy-MM-dd
@@ -12,7 +11,6 @@ class KonserModel {
 
   KonserModel({
     required this.id,
-    this.agensiId,
     required this.namaKonser,
     required this.namaGrup,
     this.tanggal,
@@ -23,16 +21,25 @@ class KonserModel {
     required this.status,
   });
 
-  // Dipakai untuk menu Kalkulasi Konser (Orang B)
+  // Dipakai untuk menu Kalkulasi Konser
   int get sisaKapasitas => kapasitas - tiketTerjual;
   double get estimasiPendapatan => tiketTerjual * hargaTiket;
+
+  // Hitung H- menuju tanggal konser. Null kalau tanggal kosong/tidak valid.
+  // Positif = masih berapa hari lagi, negatif = sudah lewat.
+  int? get hMinus {
+    if (tanggal == null) return null;
+    final tanggalKonser = DateTime.tryParse(tanggal!);
+    if (tanggalKonser == null) return null;
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    return tanggalKonser.difference(today).inDays;
+  }
 
   factory KonserModel.fromJson(Map<String, dynamic> json) {
     return KonserModel(
       id: int.parse(json['id'].toString()),
-      agensiId: json['agensi_id'] != null
-          ? int.tryParse(json['agensi_id'].toString())
-          : null,
       namaKonser: json['nama_konser'] ?? '',
       namaGrup: json['nama_grup'] ?? '',
       tanggal: json['tanggal'],

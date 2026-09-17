@@ -1,17 +1,15 @@
 import 'dart:convert';
+
 import 'package:http/http.dart' as http;
+
 import 'api_config.dart';
 import '../models/konser_model.dart';
-import '../models/agensi_model.dart';
-
-// =========================================================
-// konser_service.dart
-// Untuk Orang B — dipakai di halaman CRUD & Kalkulasi Konser.
-// =========================================================
 
 class KonserService {
   Future<List<KonserModel>> getAllKonser() async {
-    final response = await http.get(Uri.parse("${ApiConfig.baseUrl}/get_konser.php"));
+    final response = await http.get(
+      Uri.parse("${ApiConfig.baseUrl}/get_konser.php"),
+    );
     final data = jsonDecode(response.body);
 
     if (data['success'] == true) {
@@ -23,7 +21,6 @@ class KonserService {
   }
 
   Future<Map<String, dynamic>> tambahKonser({
-    required int agensiId,
     required String namaKonser,
     required String namaGrup,
     required String tanggal, // format: yyyy-MM-dd
@@ -36,7 +33,6 @@ class KonserService {
     final response = await http.post(
       Uri.parse("${ApiConfig.baseUrl}/tambah_konser.php"),
       body: {
-        "agensi_id": agensiId.toString(),
         "nama_konser": namaKonser,
         "nama_grup": namaGrup,
         "tanggal": tanggal,
@@ -52,7 +48,6 @@ class KonserService {
 
   Future<Map<String, dynamic>> editKonser({
     required int id,
-    required int agensiId,
     required String namaKonser,
     required String namaGrup,
     required String tanggal,
@@ -66,7 +61,6 @@ class KonserService {
       Uri.parse("${ApiConfig.baseUrl}/edit_konser.php"),
       body: {
         "id": id.toString(),
-        "agensi_id": agensiId.toString(),
         "nama_konser": namaKonser,
         "nama_grup": namaGrup,
         "tanggal": tanggal,
@@ -86,17 +80,5 @@ class KonserService {
       body: {"id": id.toString()},
     );
     return jsonDecode(response.body);
-  }
-
-  Future<List<AgensiModel>> getAllAgensi() async {
-    final response = await http.get(Uri.parse("${ApiConfig.baseUrl}/get_agensi.php"));
-    final data = jsonDecode(response.body);
-
-    if (data['success'] == true) {
-      return (data['data'] as List)
-          .map((item) => AgensiModel.fromJson(item))
-          .toList();
-    }
-    return [];
   }
 }
