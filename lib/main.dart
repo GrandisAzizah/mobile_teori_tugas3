@@ -23,11 +23,7 @@ class MyApp extends StatelessWidget {
       theme: AppTheme.light(),
       debugShowCheckedModeBanner: false,
       // ini dibuat kayak gini supaya bottom nav bisa dipanggil
-<<<<<<< HEAD
       initialRoute: '/login_page',
-=======
-      initialRoute: '/', // <<< SEBELUMNYA: '/main'
->>>>>>> bd2b38b244f583a2820f2277f517e19d881da615
       routes: {
         '/': (context) => const SplashPage(), // >>> TAMBAHAN <
         '/login_page': (context) => const LoginPage(),
