@@ -4,7 +4,6 @@ import '../theme/app_theme.dart';
 import '../theme/gradient_background.dart';
 import '../services/auth_service.dart';
 import '../bottom_navigation/bottom_navigation.dart';
-import 'home_page.dart';
 import 'register_page.dart';
 
 class LoginPage extends StatefulWidget {
