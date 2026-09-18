@@ -77,6 +77,7 @@ class FirestoreService {
   // Tambah konser
   Future<void> tambahKonser({
     required String agensiId,
+    String? namaAgensi,
     required String namaKonser,
     required String namaGrup,
     required DateTime tanggal,
@@ -88,6 +89,7 @@ class FirestoreService {
   }) async {
     await _db.collection('konser').add({
       'agensi_id': agensiId,
+      'nama_agensi': namaAgensi,
       'nama_konser': namaKonser,
       'nama_grup': namaGrup,
       'tanggal': Timestamp.fromDate(tanggal),
@@ -97,6 +99,39 @@ class FirestoreService {
       'harga_tiket': hargaTiket,
       'status': status,
     });
+  }
+
+  // Update konser — dipakai halaman CRUD Konser (Orang B)
+  Future<void> updateKonser({
+    required String id,
+    required String agensiId,
+    String? namaAgensi,
+    required String namaKonser,
+    required String namaGrup,
+    required DateTime tanggal,
+    required String venue,
+    required int kapasitas,
+    required int tiketTerjual,
+    required double hargaTiket,
+    required String status,
+  }) async {
+    await _db.collection('konser').doc(id).update({
+      'agensi_id': agensiId,
+      'nama_agensi': namaAgensi,
+      'nama_konser': namaKonser,
+      'nama_grup': namaGrup,
+      'tanggal': Timestamp.fromDate(tanggal),
+      'venue': venue,
+      'kapasitas': kapasitas,
+      'tiket_terjual': tiketTerjual,
+      'harga_tiket': hargaTiket,
+      'status': status,
+    });
+  }
+
+  // Hapus konser — dipakai halaman CRUD Konser (Orang B)
+  Future<void> hapusKonser(String id) async {
+    await _db.collection('konser').doc(id).delete();
   }
 
   // ============ ANGGOTA ============

@@ -2,15 +2,23 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
 import '../theme/gradient_background.dart';
-import '../services/anggota_service.dart';
+import '../services/firestore_services.dart';
 import '../models/anggota_model.dart';
 
-// Data fallback dipakai kalau fetch ke get_anggota.php gagal/belum aktif, supaya halaman tetap bisa dites duluan. Otomatis kepakai data asli begitu API-nya jalan.
+// Data fallback dipakai kalau fetch ke Firestore gagal/kosong, supaya halaman tetap bisa dites duluan.
 final List<AnggotaModel> _anggotaFallback = [
-  AnggotaModel(id: 1, nama: 'Grandis Nur Azizah', nim: '124240045'),
-  AnggotaModel(id: 2, nama: 'Chairun Feyza Hersaputri', nim: '124240105'),
-  AnggotaModel(id: 3, nama: 'Anindya Zahir Adianputri', nim: '124240113'),
-  AnggotaModel(id: 4, nama: 'Rara Ayu Pratiwi', nim: '124240151'),
+  AnggotaModel(id: 'fallback-1', nama: 'Grandis Nur Azizah', nim: '124240045'),
+  AnggotaModel(
+    id: 'fallback-2',
+    nama: 'Chairun Feyza Hersaputri',
+    nim: '124240105',
+  ),
+  AnggotaModel(
+    id: 'fallback-3',
+    nama: 'Anindya Zahir Adianputri',
+    nim: '124240113',
+  ),
+  AnggotaModel(id: 'fallback-4', nama: 'Rara Ayu Pratiwi', nim: '124240151'),
 ];
 
 class DaftarAnggotaPage extends StatefulWidget {
@@ -21,7 +29,7 @@ class DaftarAnggotaPage extends StatefulWidget {
 }
 
 class _DaftarAnggotaPageState extends State<DaftarAnggotaPage> {
-  final _anggotaService = AnggotaService();
+  final _firestoreService = FirestoreService();
   late Future<List<AnggotaModel>> _futureAnggota;
 
   @override
@@ -36,10 +44,11 @@ class _DaftarAnggotaPageState extends State<DaftarAnggotaPage> {
     });
   }
 
-  // Coba ambil dari API dulu; kalau gagal/kosong, pakai data fallback
+  // Coba ambil dari Firestore dulu; kalau gagal/kosong, pakai data fallback
   Future<List<AnggotaModel>> _muatAnggota() async {
     try {
-      final hasil = await _anggotaService.getAllAnggota();
+      final data = await _firestoreService.getAllAnggota();
+      final hasil = data.map((item) => AnggotaModel.fromMap(item)).toList();
       return hasil.isNotEmpty ? hasil : _anggotaFallback;
     } catch (_) {
       return _anggotaFallback;
@@ -99,7 +108,6 @@ class _DaftarAnggotaPageState extends State<DaftarAnggotaPage> {
         padding: const EdgeInsets.all(AppTheme.spacingMedium),
         child: Row(
           children: [
-            // Avatar (buletan) pakai warna gradient utama
             CircleAvatar(
               backgroundColor: AppTheme.primaryDark,
               radius: 28,
@@ -113,8 +121,6 @@ class _DaftarAnggotaPageState extends State<DaftarAnggotaPage> {
               ),
             ),
             const SizedBox(width: AppTheme.spacingMedium),
-
-            // Isian nama + nim
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -128,8 +134,6 @@ class _DaftarAnggotaPageState extends State<DaftarAnggotaPage> {
                 ],
               ),
             ),
-
-            // Ikon person
             const Icon(
               Icons.person_outline,
               color: AppTheme.accentGrey,

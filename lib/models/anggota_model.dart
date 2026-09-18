@@ -1,15 +1,15 @@
 class AnggotaModel {
-  final int id;
+  final String id;
   final String nama;
   final String nim;
 
   AnggotaModel({required this.id, required this.nama, required this.nim});
 
-  factory AnggotaModel.fromJson(Map<String, dynamic> json) {
+  factory AnggotaModel.fromMap(Map<String, dynamic> map) {
     return AnggotaModel(
-      id: int.parse(json['id'].toString()),
-      nama: json['nama'] ?? '',
-      nim: json['nim'] ?? '',
+      id: map['id']?.toString() ?? '',
+      nama: map['nama'] ?? '',
+      nim: map['nim'] ?? '',
     );
   }
 }

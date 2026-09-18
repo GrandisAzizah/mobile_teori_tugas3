@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-
 import '../theme/app_theme.dart';
 import '../theme/gradient_background.dart';
-import '../services/konser_service.dart';
+import '../services/firestore_services.dart';
 import '../models/konser_model.dart';
 import 'konser_form_page.dart';
 
@@ -14,20 +13,25 @@ class KonserListPage extends StatefulWidget {
 }
 
 class _KonserListPageState extends State<KonserListPage> {
-  final _konserService = KonserService();
+  final _firestoreService = FirestoreService();
 
   late Future<List<KonserModel>> _futureKonser;
 
   @override
   void initState() {
     super.initState();
-    _futureKonser = _konserService.getAllKonser();
+    _futureKonser = _muatKonser();
   }
 
   void _reload() {
     setState(() {
-      _futureKonser = _konserService.getAllKonser();
+      _futureKonser = _muatKonser();
     });
+  }
+
+  Future<List<KonserModel>> _muatKonser() async {
+    final data = await _firestoreService.getAllKonser();
+    return data.map((item) => KonserModel.fromMap(item)).toList();
   }
 
   Future<void> _hapus(KonserModel konser) async {
@@ -52,13 +56,19 @@ class _KonserListPageState extends State<KonserListPage> {
     if (confirm != true) return;
     if (!mounted) return;
 
-    final result = await _konserService.hapusKonser(konser.id);
-    if (!mounted) return;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(result['message'] ?? 'Konser dihapus')),
-    );
-    _reload();
+    try {
+      await _firestoreService.hapusKonser(konser.id);
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Konser dihapus')));
+      _reload();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Gagal menghapus: $e')));
+    }
   }
 
   Color _statusColor(String status) {
@@ -191,7 +201,7 @@ class _KonserListPageState extends State<KonserListPage> {
             Text(konser.namaGrup, style: AppTheme.textTheme.bodyMedium),
             const SizedBox(height: 2),
             Text(
-              '${konser.venue} • ${konser.tanggal ?? "-"}',
+              '${konser.venue} • ${konser.tanggalFormatted}',
               style: AppTheme.textTheme.bodySmall,
             ),
             const SizedBox(height: 2),

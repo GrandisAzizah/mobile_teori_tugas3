@@ -1,10 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class KonserModel {
-  final int id;
-  final int? agensiId;
-  final String? namaAgensi; // hasil JOIN dari get_konser.php
+  final String id;
+  final String? agensiId;
+  final String? namaAgensi;
   final String namaKonser;
   final String namaGrup;
-  final String? tanggal; // format: yyyy-MM-dd
+  final DateTime? tanggal;
   final String venue;
   final int kapasitas;
   final int tiketTerjual;
@@ -29,33 +31,40 @@ class KonserModel {
   int get sisaKapasitas => kapasitas - tiketTerjual;
   double get estimasiPendapatan => tiketTerjual * hargaTiket;
 
-  // Hitung H- menuju tanggal konser. Null kalau tanggal kosong/tidak valid.
+  // Hitung H- menuju tanggal konser. Null kalau tanggal kosong.
   // Positif = masih berapa hari lagi, negatif = sudah lewat.
   int? get hMinus {
     if (tanggal == null) return null;
-    final tanggalKonser = DateTime.tryParse(tanggal!);
-    if (tanggalKonser == null) return null;
-
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    return tanggalKonser.difference(today).inDays;
+    final tglKonser = DateTime(tanggal!.year, tanggal!.month, tanggal!.day);
+    return tglKonser.difference(today).inDays;
   }
 
-  factory KonserModel.fromJson(Map<String, dynamic> json) {
+  // Tampilan tanggal jadi yyyy-MM-dd
+  String get tanggalFormatted {
+    if (tanggal == null) return '-';
+    return '${tanggal!.year.toString().padLeft(4, '0')}-'
+        '${tanggal!.month.toString().padLeft(2, '0')}-'
+        '${tanggal!.day.toString().padLeft(2, '0')}';
+  }
+
+  // map berasal dari FirestoreService: {'id': doc.id, ...doc.data()}
+  factory KonserModel.fromMap(Map<String, dynamic> map) {
     return KonserModel(
-      id: int.parse(json['id'].toString()),
-      agensiId: json['agensi_id'] != null
-          ? int.tryParse(json['agensi_id'].toString())
+      id: map['id']?.toString() ?? '',
+      agensiId: map['agensi_id']?.toString(),
+      namaAgensi: map['nama_agensi'],
+      namaKonser: map['nama_konser'] ?? '',
+      namaGrup: map['nama_grup'] ?? '',
+      tanggal: map['tanggal'] is Timestamp
+          ? (map['tanggal'] as Timestamp).toDate()
           : null,
-      namaAgensi: json['nama_agensi'],
-      namaKonser: json['nama_konser'] ?? '',
-      namaGrup: json['nama_grup'] ?? '',
-      tanggal: json['tanggal'],
-      venue: json['venue'] ?? '',
-      kapasitas: int.tryParse(json['kapasitas'].toString()) ?? 0,
-      tiketTerjual: int.tryParse(json['tiket_terjual'].toString()) ?? 0,
-      hargaTiket: double.tryParse(json['harga_tiket'].toString()) ?? 0,
-      status: json['status'] ?? 'akan_datang',
+      venue: map['venue'] ?? '',
+      kapasitas: (map['kapasitas'] as num?)?.toInt() ?? 0,
+      tiketTerjual: (map['tiket_terjual'] as num?)?.toInt() ?? 0,
+      hargaTiket: (map['harga_tiket'] as num?)?.toDouble() ?? 0,
+      status: map['status'] ?? 'akan_datang',
     );
   }
 }

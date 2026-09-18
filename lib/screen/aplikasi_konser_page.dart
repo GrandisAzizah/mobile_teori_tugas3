@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-
 import '../theme/app_theme.dart';
 import '../theme/gradient_background.dart';
-import '../services/konser_service.dart';
+import '../services/firestore_services.dart';
 import '../models/konser_model.dart';
 
 class AplikasiKonserPage extends StatefulWidget {
@@ -13,7 +12,7 @@ class AplikasiKonserPage extends StatefulWidget {
 }
 
 class _AplikasiKonserPageState extends State<AplikasiKonserPage> {
-  final _konserService = KonserService();
+  final _firestoreService = FirestoreService();
   late Future<List<KonserModel>> _futureKonser;
 
   KonserModel? _terpilih;
@@ -21,7 +20,12 @@ class _AplikasiKonserPageState extends State<AplikasiKonserPage> {
   @override
   void initState() {
     super.initState();
-    _futureKonser = _konserService.getAllKonser();
+    _futureKonser = _muatKonser();
+  }
+
+  Future<List<KonserModel>> _muatKonser() async {
+    final data = await _firestoreService.getAllKonser();
+    return data.map((item) => KonserModel.fromMap(item)).toList();
   }
 
   // Format angka jadi Rupiah sederhana, misal 1500000 -> Rp1.500.000
@@ -93,7 +97,7 @@ class _AplikasiKonserPageState extends State<AplikasiKonserPage> {
                 children: [
                   Text('Pilih Konser', style: AppTheme.textTheme.titleLarge),
                   const SizedBox(height: AppTheme.spacingMedium),
-                  DropdownButtonFormField<int>(
+                  DropdownButtonFormField<String>(
                     value: _terpilih!.id,
                     decoration: const InputDecoration(
                       prefixIcon: Icon(Icons.event_outlined),
@@ -118,7 +122,7 @@ class _AplikasiKonserPageState extends State<AplikasiKonserPage> {
                   Text('Hasil Kalkulasi', style: AppTheme.textTheme.titleLarge),
                   const SizedBox(height: AppTheme.spacingSmall),
                   _buildHasilRow('Venue', _terpilih!.venue),
-                  _buildHasilRow('Tanggal', _terpilih!.tanggal ?? '-'),
+                  _buildHasilRow('Tanggal', _terpilih!.tanggalFormatted),
                   _buildHasilRow(
                     'Tiket Terjual',
                     '${_terpilih!.tiketTerjual}/${_terpilih!.kapasitas}',

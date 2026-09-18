@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-
 import '../theme/app_theme.dart';
 import '../theme/gradient_background.dart';
-import '../services/konser_service.dart';
+import '../services/firestore_services.dart';
 import '../models/konser_model.dart';
 import '../models/agensi_model.dart';
 
@@ -19,18 +18,18 @@ class KonserFormPage extends StatefulWidget {
 
 class _KonserFormPageState extends State<KonserFormPage> {
   final _formKey = GlobalKey<FormState>();
-  final _konserService = KonserService();
+  final _firestoreService = FirestoreService();
 
   late final TextEditingController _namaKonserController;
   late final TextEditingController _namaGrupController;
-  late final TextEditingController _tanggalController;
   late final TextEditingController _venueController;
   late final TextEditingController _kapasitasController;
   late final TextEditingController _terjualController;
   late final TextEditingController _hargaController;
 
+  DateTime? _tanggal;
   String _status = 'akan_datang';
-  int? _agensiId;
+  String? _agensiId;
 
   late Future<List<AgensiModel>> _futureAgensi;
   bool _isSaving = false;
@@ -45,7 +44,6 @@ class _KonserFormPageState extends State<KonserFormPage> {
       text: konser?.namaKonser ?? '',
     );
     _namaGrupController = TextEditingController(text: konser?.namaGrup ?? '');
-    _tanggalController = TextEditingController(text: konser?.tanggal ?? '');
     _venueController = TextEditingController(text: konser?.venue ?? '');
     _kapasitasController = TextEditingController(
       text: konser?.kapasitas.toString() ?? '',
@@ -57,17 +55,22 @@ class _KonserFormPageState extends State<KonserFormPage> {
       text: konser?.hargaTiket.toString() ?? '',
     );
 
+    _tanggal = konser?.tanggal;
     _status = konser?.status ?? 'akan_datang';
     _agensiId = konser?.agensiId;
 
-    _futureAgensi = _konserService.getAllAgensi();
+    _futureAgensi = _muatAgensi();
+  }
+
+  Future<List<AgensiModel>> _muatAgensi() async {
+    final data = await _firestoreService.getAllAgensi();
+    return data.map((item) => AgensiModel.fromMap(item)).toList();
   }
 
   @override
   void dispose() {
     _namaKonserController.dispose();
     _namaGrupController.dispose();
-    _tanggalController.dispose();
     _venueController.dispose();
     _kapasitasController.dispose();
     _terjualController.dispose();
@@ -77,20 +80,23 @@ class _KonserFormPageState extends State<KonserFormPage> {
 
   Future<void> _pilihTanggal() async {
     final now = DateTime.now();
-    final initialDate = DateTime.tryParse(_tanggalController.text) ?? now;
-
     final picked = await showDatePicker(
       context: context,
-      initialDate: initialDate,
+      initialDate: _tanggal ?? now,
       firstDate: DateTime(now.year - 5),
       lastDate: DateTime(now.year + 5),
     );
 
     if (picked != null) {
-      final formatted =
-          '${picked.year.toString().padLeft(4, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
-      setState(() => _tanggalController.text = formatted);
+      setState(() => _tanggal = picked);
     }
+  }
+
+  String _formatTanggal(DateTime? tanggal) {
+    if (tanggal == null) return '';
+    return '${tanggal.year.toString().padLeft(4, '0')}-'
+        '${tanggal.month.toString().padLeft(2, '0')}-'
+        '${tanggal.day.toString().padLeft(2, '0')}';
   }
 
   Future<void> _simpan() async {
@@ -98,6 +104,10 @@ class _KonserFormPageState extends State<KonserFormPage> {
 
     if (_agensiId == null) {
       setState(() => _errorMessage = 'Pilih agensi terlebih dahulu');
+      return;
+    }
+    if (_tanggal == null) {
+      setState(() => _errorMessage = 'Pilih tanggal konser terlebih dahulu');
       return;
     }
 
@@ -110,43 +120,48 @@ class _KonserFormPageState extends State<KonserFormPage> {
     final terjual = int.parse(_terjualController.text);
     final harga = double.parse(_hargaController.text);
 
-    Map<String, dynamic> result;
-    if (widget.isEdit) {
-      result = await _konserService.editKonser(
-        id: widget.konser!.id,
-        agensiId: _agensiId!,
-        namaKonser: _namaKonserController.text.trim(),
-        namaGrup: _namaGrupController.text.trim(),
-        tanggal: _tanggalController.text.trim(),
-        venue: _venueController.text.trim(),
-        kapasitas: kapasitas,
-        tiketTerjual: terjual,
-        hargaTiket: harga,
-        status: _status,
-      );
-    } else {
-      result = await _konserService.tambahKonser(
-        agensiId: _agensiId!,
-        namaKonser: _namaKonserController.text.trim(),
-        namaGrup: _namaGrupController.text.trim(),
-        tanggal: _tanggalController.text.trim(),
-        venue: _venueController.text.trim(),
-        kapasitas: kapasitas,
-        tiketTerjual: terjual,
-        hargaTiket: harga,
-        status: _status,
-      );
-    }
+    // Cari nama agensi terpilih, biar disimpan juga (memudahkan tampilan list)
+    final daftarAgensi = await _futureAgensi;
+    final agensiTerpilih = daftarAgensi.firstWhere((a) => a.id == _agensiId);
 
-    setState(() => _isSaving = false);
-    if (!mounted) return;
+    try {
+      if (widget.isEdit) {
+        await _firestoreService.updateKonser(
+          id: widget.konser!.id,
+          agensiId: _agensiId!,
+          namaAgensi: agensiTerpilih.namaAgensi,
+          namaKonser: _namaKonserController.text.trim(),
+          namaGrup: _namaGrupController.text.trim(),
+          tanggal: _tanggal!,
+          venue: _venueController.text.trim(),
+          kapasitas: kapasitas,
+          tiketTerjual: terjual,
+          hargaTiket: harga,
+          status: _status,
+        );
+      } else {
+        await _firestoreService.tambahKonser(
+          agensiId: _agensiId!,
+          namaAgensi: agensiTerpilih.namaAgensi,
+          namaKonser: _namaKonserController.text.trim(),
+          namaGrup: _namaGrupController.text.trim(),
+          tanggal: _tanggal!,
+          venue: _venueController.text.trim(),
+          kapasitas: kapasitas,
+          tiketTerjual: terjual,
+          hargaTiket: harga,
+          status: _status,
+        );
+      }
 
-    if (result['success'] == true) {
+      setState(() => _isSaving = false);
+      if (!mounted) return;
       Navigator.pop(context, true);
-    } else {
-      setState(
-        () => _errorMessage = result['message'] ?? 'Gagal menyimpan data',
-      );
+    } catch (e) {
+      setState(() {
+        _isSaving = false;
+        _errorMessage = 'Gagal menyimpan data: $e';
+      });
     }
   }
 
@@ -189,7 +204,7 @@ class _KonserFormPageState extends State<KonserFormPage> {
                   future: _futureAgensi,
                   builder: (context, snapshot) {
                     final daftarAgensi = snapshot.data ?? [];
-                    return DropdownButtonFormField<int>(
+                    return DropdownButtonFormField<String>(
                       value: daftarAgensi.any((a) => a.id == _agensiId)
                           ? _agensiId
                           : null,
@@ -208,16 +223,16 @@ class _KonserFormPageState extends State<KonserFormPage> {
                 ),
                 const SizedBox(height: AppTheme.spacingMedium),
                 TextFormField(
-                  controller: _tanggalController,
                   readOnly: true,
+                  controller: TextEditingController(
+                    text: _formatTanggal(_tanggal),
+                  ),
                   onTap: _pilihTanggal,
                   decoration: const InputDecoration(
-                    labelText: 'Tanggal (yyyy-MM-dd)',
+                    labelText: 'Tanggal',
                     prefixIcon: Icon(Icons.calendar_today_outlined),
                   ),
-                  validator: (value) => (value == null || value.trim().isEmpty)
-                      ? 'Wajib diisi'
-                      : null,
+                  validator: (_) => _tanggal == null ? 'Wajib diisi' : null,
                 ),
                 const SizedBox(height: AppTheme.spacingMedium),
                 TextFormField(
