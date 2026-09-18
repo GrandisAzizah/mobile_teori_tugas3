@@ -16,14 +16,14 @@ class _CalendarConversionScreenState extends State<CalendarConversionScreen> {
   String _wetonResult = '-';
   String _sakaResult = '-';
 
-  final List<String> _hariIndonesia = [
-    'Senin', 
-    'Selasa', 
-    'Rabu', 
-    'Kamis', 
-    'Jumat', 
-    'Sabtu', 
-    'Minggu'
+  final List<String> _hariInggris = [
+    'Monday', 
+    'Tuesday', 
+    'Wednesday', 
+    'Thursday', 
+    'Friday', 
+    'Saturday', 
+    'Sunday'
   ];
 
   // Kalender Saka Bali menggunakan referensi Pawukon 
@@ -168,7 +168,7 @@ class _CalendarConversionScreenState extends State<CalendarConversionScreen> {
                 subtitle: Text(
                   _selectedDate == null
                       ? 'Belum ada tanggal dipilih'
-                      : "${_hariIndonesia[_selectedDate!.weekday - 1]}, "
+                      : "${_hariInggris[_selectedDate!.weekday - 1]}, "
                         "${DateFormat('dd MMMM yyyy').format(_selectedDate!)}",
                   style: AppTheme.textTheme.titleLarge,
                 ),
