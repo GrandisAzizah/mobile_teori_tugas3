@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:mobile_teori_tugas3/theme/app_theme.dart';
 
@@ -11,57 +10,74 @@ class Stopwatch extends StatefulWidget {
 }
 
 class _StopwatchState extends State<Stopwatch> {
-  int _elapsedSeconds = 0;
+  // ===== STATE BARU =====
+  Duration _elapsed = Duration.zero; // Total waktu yang udah jalan
+  DateTime? _startTime; // Waktu mulai (saat running)
   bool _isRunning = false;
   Timer? _timer;
-  final List<int> _laps = [];
+  final List<Duration> _laps = []; // Simpan Duration, bukan int
 
   // ===== START / RESUME =====
   void _startTimer() {
     if (_isRunning) return;
 
-    setState(() => _isRunning = true);
+    setState(() {
+      _isRunning = true;
+      // 👇 Simpan waktu mulai = sekarang - waktu yang udah jalan
+      _startTime = DateTime.now().subtract(_elapsed);
+    });
 
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      setState(() => _elapsedSeconds++);
+    // Timer cuma buat refresh UI tiap detik
+    _timer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
+      if (mounted) setState(() {});
     });
   }
 
-  // ===== PAUSE (berhenti sementara, waktu tetap) =====
+  // ===== PAUSE =====
   void _pauseTimer() {
     if (!_isRunning) return;
 
-    setState(() => _isRunning = false);
+    setState(() {
+      _isRunning = false;
+      // 👇 Simpan total waktu yang udah jalan
+      if (_startTime != null) {
+        _elapsed = DateTime.now().difference(_startTime!);
+      }
+      _startTime = null;
+    });
     _timer?.cancel();
   }
 
-  // ===== RESET (balik ke 0) =====
+  // ===== RESET =====
   void _resetTimer() {
     _pauseTimer();
     setState(() {
-      _elapsedSeconds = 0;
+      _elapsed = Duration.zero;
       _laps.clear();
+      _startTime = null;
     });
   }
 
   // ===== LAP =====
   void _addLap() {
-    if (_elapsedSeconds == 0) return;
-    setState(() => _laps.insert(0, _elapsedSeconds));
+    Duration current = _getCurrentDuration();
+    if (current.inSeconds == 0) return;
+    setState(() => _laps.insert(0, current));
+  }
+
+  // ===== HITUNG DURASI SEKARANG =====
+  Duration _getCurrentDuration() {
+    if (_isRunning && _startTime != null) {
+      return DateTime.now().difference(_startTime!);
+    }
+    return _elapsed;
   }
 
   // ===== FORMAT =====
-  String get _formattedTime {
-    final h = (_elapsedSeconds ~/ 3600).toString().padLeft(2, '0');
-    final m = ((_elapsedSeconds % 3600) ~/ 60).toString().padLeft(2, '0');
-    final s = (_elapsedSeconds % 60).toString().padLeft(2, '0');
-    return '$h:$m:$s';
-  }
-
-  String _formatLap(int total) {
-    final h = (total ~/ 3600).toString().padLeft(2, '0');
-    final m = ((total % 3600) ~/ 60).toString().padLeft(2, '0');
-    final s = (total % 60).toString().padLeft(2, '0');
+  String _formatDuration(Duration d) {
+    final h = d.inHours.toString().padLeft(2, '0');
+    final m = (d.inMinutes % 60).toString().padLeft(2, '0');
+    final s = (d.inSeconds % 60).toString().padLeft(2, '0');
     return '$h:$m:$s';
   }
 
@@ -73,6 +89,8 @@ class _StopwatchState extends State<Stopwatch> {
 
   @override
   Widget build(BuildContext context) {
+    final currentDuration = _getCurrentDuration();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Stopwatch'),
@@ -93,7 +111,7 @@ class _StopwatchState extends State<Stopwatch> {
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Text(
-                      _formattedTime,
+                      _formatDuration(currentDuration),
                       style: const TextStyle(
                         fontSize: 56,
                         fontWeight: FontWeight.bold,
@@ -107,11 +125,8 @@ class _StopwatchState extends State<Stopwatch> {
 
             // ===== TOMBOL =====
             Center(
-              // 👈 Tengahin
               child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxWidth: 500,
-                ), // 👈 MAX WIDTH
+                constraints: const BoxConstraints(maxWidth: 500),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Row(
@@ -160,7 +175,7 @@ class _StopwatchState extends State<Stopwatch> {
                       itemCount: _laps.length,
                       itemBuilder: (context, index) {
                         final lapNum = _laps.length - index;
-                        final sec = _laps[index];
+                        final lapDur = _laps[index];
                         return ListTile(
                           leading: CircleAvatar(
                             backgroundColor: AppTheme.primaryDark,
@@ -171,7 +186,7 @@ class _StopwatchState extends State<Stopwatch> {
                           ),
                           title: Text('Lap $lapNum'),
                           trailing: Text(
-                            _formatLap(sec),
+                            _formatDuration(lapDur),
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
