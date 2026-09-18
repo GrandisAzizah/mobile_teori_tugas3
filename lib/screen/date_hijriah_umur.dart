@@ -31,6 +31,16 @@ class _DateConversionScreenState extends State<DateConversionScreen> {
     'Dzulhijjah',
   ];
 
+  final List<String> _hariInggris = [
+    'Monday', 
+    'Tuesday', 
+    'Wednesday', 
+    'Thursday', 
+    'Friday', 
+    'Saturday', 
+    'Sunday'
+  ];
+
   final List<String> _hariIndonesia = [
     'Senin', 
     'Selasa', 
@@ -75,7 +85,7 @@ class _DateConversionScreenState extends State<DateConversionScreen> {
       adjustmentConfiguration: GlobalHijriAdjustmentConfiguration(),
     );
     
-    // Mengambil nama hari dari variabel class _hariIndonesia 
+    // Mengambil nama hari dari variabel class _hariIndonesia   
     final dayName = _hariIndonesia[_selectedDate!.weekday - 1];
     
     // Mengambil nama bulan dari variabel class _hijriMonths 
@@ -151,7 +161,7 @@ class _DateConversionScreenState extends State<DateConversionScreen> {
                 subtitle: Text(
                   _selectedDate == null
                       ? 'Belum ada tanggal dipilih'
-                      : "${_hariIndonesia[_selectedDate!.weekday - 1]}, "
+                      : "${_hariInggris[_selectedDate!.weekday - 1]}, "
                         "${DateFormat('dd MMMM yyyy').format(_selectedDate!)}",
                   style: AppTheme.textTheme.titleLarge,
                 ),
