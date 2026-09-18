@@ -60,6 +60,12 @@ class _KonserFormPageState extends State<KonserFormPage> {
     _agensiId = konser?.agensiId;
 
     _futureAgensi = _muatAgensi();
+
+    // Setiap kapasitas berubah, validasi ulang field tiket terjual
+    // (karena batas atasnya bergantung ke nilai kapasitas)
+    _kapasitasController.addListener(() {
+      _formKey.currentState?.validate();
+    });
   }
 
   Future<List<AgensiModel>> _muatAgensi() async {
@@ -99,6 +105,35 @@ class _KonserFormPageState extends State<KonserFormPage> {
         '${tanggal.day.toString().padLeft(2, '0')}';
   }
 
+  // ---- Validator kapasitas: wajib angka bulat > 0 ----
+  String? _validasiKapasitas(String? value) {
+    final kapasitas = int.tryParse(value ?? '');
+    if (kapasitas == null) return 'Isi dengan angka';
+    if (kapasitas <= 0) return 'Kapasitas harus lebih dari 0';
+    return null;
+  }
+
+  // ---- Validator tiket terjual: angka bulat >= 0 DAN <= kapasitas ----
+  String? _validasiTerjual(String? value) {
+    final terjual = int.tryParse(value ?? '');
+    if (terjual == null) return 'Isi dengan angka';
+    if (terjual < 0) return 'Tidak boleh negatif';
+
+    final kapasitas = int.tryParse(_kapasitasController.text);
+    if (kapasitas != null && terjual > kapasitas) {
+      return 'Tidak boleh lebih dari kapasitas ($kapasitas)';
+    }
+    return null;
+  }
+
+  // ---- Validator harga tiket: angka >= 0 ----
+  String? _validasiHarga(String? value) {
+    final harga = double.tryParse(value ?? '');
+    if (harga == null) return 'Isi dengan angka';
+    if (harga < 0) return 'Tidak boleh negatif';
+    return null;
+  }
+
   Future<void> _simpan() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -111,14 +146,23 @@ class _KonserFormPageState extends State<KonserFormPage> {
       return;
     }
 
+    final kapasitas = int.parse(_kapasitasController.text);
+    final terjual = int.parse(_terjualController.text);
+    final harga = double.parse(_hargaController.text);
+
+    // Jaga-jaga tambahan di luar validator form, kalau-kalau ada
+    // jalur lain yang melewati validasi (misal isi lewat kode lain).
+    if (terjual > kapasitas) {
+      setState(
+        () => _errorMessage = 'Tiket terjual tidak boleh lebih dari kapasitas',
+      );
+      return;
+    }
+
     setState(() {
       _isSaving = true;
       _errorMessage = null;
     });
-
-    final kapasitas = int.parse(_kapasitasController.text);
-    final terjual = int.parse(_terjualController.text);
-    final harga = double.parse(_hargaController.text);
 
     // Cari nama agensi terpilih, biar disimpan juga (memudahkan tampilan list)
     final daftarAgensi = await _futureAgensi;
@@ -179,6 +223,7 @@ class _KonserFormPageState extends State<KonserFormPage> {
           ),
           child: Form(
             key: _formKey,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -247,18 +292,17 @@ class _KonserFormPageState extends State<KonserFormPage> {
                   controller: _kapasitasController,
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(labelText: 'Kapasitas'),
-                  validator: (value) => (int.tryParse(value ?? '') == null)
-                      ? 'Isi dengan angka'
-                      : null,
+                  validator: _validasiKapasitas,
                 ),
                 const SizedBox(height: AppTheme.spacingMedium),
                 TextFormField(
                   controller: _terjualController,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(labelText: 'Tiket Terjual'),
-                  validator: (value) => (int.tryParse(value ?? '') == null)
-                      ? 'Isi dengan angka'
-                      : null,
+                  decoration: const InputDecoration(
+                    labelText: 'Tiket Terjual',
+                    helperText: 'Tidak boleh lebih dari kapasitas',
+                  ),
+                  validator: _validasiTerjual,
                 ),
                 const SizedBox(height: AppTheme.spacingMedium),
                 TextFormField(
@@ -269,9 +313,7 @@ class _KonserFormPageState extends State<KonserFormPage> {
                   decoration: const InputDecoration(
                     labelText: 'Harga Tiket (Rp)',
                   ),
-                  validator: (value) => (double.tryParse(value ?? '') == null)
-                      ? 'Isi dengan angka'
-                      : null,
+                  validator: _validasiHarga,
                 ),
                 const SizedBox(height: AppTheme.spacingMedium),
                 DropdownButtonFormField<String>(

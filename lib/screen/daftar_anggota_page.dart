@@ -49,9 +49,13 @@ class _DaftarAnggotaPageState extends State<DaftarAnggotaPage> {
     try {
       final data = await _firestoreService.getAllAnggota();
       final hasil = data.map((item) => AnggotaModel.fromMap(item)).toList();
-      return hasil.isNotEmpty ? hasil : _anggotaFallback;
+      final daftar = hasil.isNotEmpty ? hasil : _anggotaFallback;
+      daftar.sort((a, b) => a.nim.compareTo(b.nim)); // urutkan berdasarkan NIM
+      return daftar;
     } catch (_) {
-      return _anggotaFallback;
+      final daftar = List<AnggotaModel>.from(_anggotaFallback);
+      daftar.sort((a, b) => a.nim.compareTo(b.nim));
+      return daftar;
     }
   }
 
