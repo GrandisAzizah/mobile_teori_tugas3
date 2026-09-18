@@ -56,7 +56,7 @@ class _DateConversionScreenState extends State<DateConversionScreen> {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
-      firstDate: DateTime(1900),
+      firstDate: DateTime(1700),
       lastDate: DateTime(2100),
     );
     if (picked != null) {
