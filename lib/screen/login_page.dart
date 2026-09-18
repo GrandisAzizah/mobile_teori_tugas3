@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../theme/gradient_background.dart';
 import '../services/auth_service.dart';
+import '../bottom_navigation/bottom_navigation.dart';
 import 'home_page.dart';
 import 'register_page.dart';
 
@@ -44,7 +45,7 @@ class _LoginPageState extends State<LoginPage> {
     if (result['success'] == true) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const HomePage()),
+        MaterialPageRoute(builder: (_) => const BottomNavigationPage()),
       );
     } else {
       setState(() => _errorMessage = result['message']);
